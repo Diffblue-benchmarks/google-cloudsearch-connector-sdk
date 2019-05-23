@@ -1,0 +1,366 @@
+buildCmd: mvn -e -X -Dmaven.test.skip=true compile
+testCmd: true
+lineLength: 4096
+skipVerification: true
+cbmcArguments:
+  # Do not generate coverage comments on generated tests.
+  java-generate-no-comments: true
+phases:
+  -
+  #Phase 0 PRETTY AND SIMPLE - Simple models, quick cover, pretty Tests, Do Not Test Private Method Directly
+    timeout: 180
+    cbmcArguments:
+      # Use simple models containers (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
+      classpath: '/tools/cbmc/models-simple-overlay.jar:/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 1500
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: true
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 1
+      # Do not test any methods that have the specified access level.
+      do-not-test-methods-with-access: [ private ]
+      # Instrument the entry point function only.
+      cover-function-only: false
+      # Instrument the file as opposed to the function only
+      cover-only: file
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+  -
+  #Phase 1 PRETTY AND COMPLEX - Standard models, longer run time, pretty tests, Do Not Test Private Method Directly
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 2
+      # Do not test any methods that have the specified access level.
+      do-not-test-methods-with-access: [ private ]
+      # Instrument the entry point function only.
+      cover-function-only: false
+      # instrument the file as opposed to the function only
+      cover-only: file
+  -
+  #Phase 2 Simple and Private Directly
+    timeout: 180
+    cbmcArguments:
+      # Use simple models containers (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
+      classpath: '/tools/cbmc/models-simple-overlay.jar:/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 1500
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: true
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 1
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+      # If the logs contain output of the following then proceed to phase X
+    nextPhase:
+      # If the function is not analysable then do not pass onto the next phase
+      not_analyzed: null
+  -
+  #Phase 3 Complex and Private Directly
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 3000
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 30
+      # Bound the length of input strings.
+      max-nondet-string-length: 30
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 3
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+  -
+  #Phase 4 EXCEPTIONS
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 30
+      # Bound the length of input strings.
+      max-nondet-string-length: 30
+      # Add constraint that strings are printable
+      string-printable: false
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: true
+      # Set an upper bound on loop unwinding.
+  -
+    #PHASE 5 Big numbers and less contraints on inputs 
+    timeout: 300
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 100
+      # Bound the length of input strings.
+      max-nondet-string-length: 100
+      # Add constraint that strings are printable
+      string-printable: false
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 6
+units:
+# Target TGF: 461.975
+#  >methods=32
+#  >complexity=670
+#  >construction=48.1785714286
+#  >dependency=9.26666666667
+ - target:
+   - dir: indexing/target/classes
+     file: com/google/enterprise/cloudsearch/sdk/indexing/Acl.class
+     sourceDir: indexing/src/main/java
+     sourceFile: com/google/enterprise/cloudsearch/sdk/indexing/Acl.java
+   - dir: indexing/target/classes
+     file: com/google/enterprise/cloudsearch/sdk/indexing/Acl$InheritanceType.class
+     sourceDir: indexing/src/main/java
+     sourceFile: com/google/enterprise/cloudsearch/sdk/indexing/Acl.java
+   - dir: indexing/target/classes
+     file: com/google/enterprise/cloudsearch/sdk/indexing/Acl$Builder.class
+     sourceDir: indexing/src/main/java
+     sourceFile: com/google/enterprise/cloudsearch/sdk/indexing/Acl.java
+   - dir: indexing/target/classes
+     file: com/google/enterprise/cloudsearch/sdk/indexing/IndexingItemBuilder$ItemType.class
+     sourceDir: indexing/src/main/java
+     sourceFile: com/google/enterprise/cloudsearch/sdk/indexing/IndexingItemBuilder.java
+   - dir: indexing/target/classes
+     file: com/google/enterprise/cloudsearch/sdk/indexing/Acl$GroupPrincipalParser.class
+     sourceDir: indexing/src/main/java
+     sourceFile: com/google/enterprise/cloudsearch/sdk/indexing/Acl.java
+   - dir: sdk/target/classes
+     file: com/google/enterprise/cloudsearch/sdk/GroupIdEncoder.class
+     sourceDir: sdk/src/main/java
+     sourceFile: com/google/enterprise/cloudsearch/sdk/GroupIdEncoder.java
+   - dir: indexing/target/classes
+     file: com/google/enterprise/cloudsearch/sdk/indexing/Acl$UserPrincipalParser.class
+     sourceDir: indexing/src/main/java
+     sourceFile: com/google/enterprise/cloudsearch/sdk/indexing/Acl.java
+# Target TGF: 529.0
+#  >methods=12
+#  >complexity=235
+#  >construction=10.25
+#  >dependency=1.16666666667
+ - target:
+   - dir: sdk/target/classes
+     file: com/google/enterprise/cloudsearch/sdk/config/SensitiveDataCodec.class
+     sourceDir: sdk/src/main/java
+     sourceFile: com/google/enterprise/cloudsearch/sdk/config/SensitiveDataCodec.java
+   - dir: sdk/target/classes
+     file: com/google/enterprise/cloudsearch/sdk/InvalidConfigurationException.class
+     sourceDir: sdk/src/main/java
+     sourceFile: com/google/enterprise/cloudsearch/sdk/InvalidConfigurationException.java
+   - dir: sdk/target/classes
+     file: com/google/enterprise/cloudsearch/sdk/config/SensitiveDataCodec$SensitiveDataCodecHelper.class
+     sourceDir: sdk/src/main/java
+     sourceFile: com/google/enterprise/cloudsearch/sdk/config/SensitiveDataCodec.java
+   - dir: sdk/target/classes
+     file: com/google/enterprise/cloudsearch/sdk/config/SensitiveDataCodec$SecurityLevel.class
+     sourceDir: sdk/src/main/java
+     sourceFile: com/google/enterprise/cloudsearch/sdk/config/SensitiveDataCodec.java
+# Target TGF: 287.4
+#  >methods=15
+#  >complexity=330
+#  >construction=12.5
+#  >dependency=1.03333333333
+ - target:
+   - dir: indexing/target/classes
+     file: com/google/enterprise/cloudsearch/sdk/indexing/ContentTemplate.class
+     sourceDir: indexing/src/main/java
+     sourceFile: com/google/enterprise/cloudsearch/sdk/indexing/ContentTemplate.java
+   - dir: indexing/target/classes
+     file: com/google/enterprise/cloudsearch/sdk/indexing/ContentTemplate$Builder.class
+     sourceDir: indexing/src/main/java
+     sourceFile: com/google/enterprise/cloudsearch/sdk/indexing/ContentTemplate.java
+   - dir: sdk/target/classes
+     file: com/google/enterprise/cloudsearch/sdk/config/Configuration.class
+     sourceDir: sdk/src/main/java
+     sourceFile: com/google/enterprise/cloudsearch/sdk/config/Configuration.java
+   - dir: sdk/target/classes
+     file: com/google/enterprise/cloudsearch/sdk/config/ConfigValue.class
+     sourceDir: sdk/src/main/java
+     sourceFile: com/google/enterprise/cloudsearch/sdk/config/ConfigValue.java
+# Target TGF: 622.9125
+#  >methods=13
+#  >complexity=333
+#  >construction=12.25
+#  >dependency=1.6
+ - target:
+   - dir: it/target/classes
+     file: com/google/enterprise/cloudsearch/sdk/identity/DirectoryFacade.class
+     sourceDir: it/src/main/java
+     sourceFile: com/google/enterprise/cloudsearch/sdk/identity/DirectoryFacade.java
+   - dir: sdk/target/classes
+     file: com/google/enterprise/cloudsearch/sdk/RetryPolicy$Builder.class
+     sourceDir: sdk/src/main/java
+     sourceFile: com/google/enterprise/cloudsearch/sdk/RetryPolicy.java
+   - dir: sdk/target/classes
+     file: com/google/enterprise/cloudsearch/sdk/BaseApiService$RetryRequestInitializer.class
+     sourceDir: sdk/src/main/java
+     sourceFile: com/google/enterprise/cloudsearch/sdk/BaseApiService.java
+# Target TGF: 259.666666667
+#  >methods=9
+#  >complexity=219
+#  >construction=11.5
+#  >dependency=1.0
+ - target:
+   - dir: indexing/target/classes
+     file: com/google/enterprise/cloudsearch/sdk/indexing/util/Uploader.class
+     sourceDir: indexing/src/main/java
+     sourceFile: com/google/enterprise/cloudsearch/sdk/indexing/util/Uploader.java
+   - dir: indexing/target/classes
+     file: com/google/enterprise/cloudsearch/sdk/indexing/util/UploadRequest$AbstractRequest.class
+     sourceDir: indexing/src/main/java
+     sourceFile: com/google/enterprise/cloudsearch/sdk/indexing/util/UploadRequest.java
+   - dir: indexing/target/classes
+     file: com/google/enterprise/cloudsearch/sdk/indexing/util/Uploader$Builder.class
+     sourceDir: indexing/src/main/java
+     sourceFile: com/google/enterprise/cloudsearch/sdk/indexing/util/Uploader.java
+   - dir: indexing/target/classes
+     file: com/google/enterprise/cloudsearch/sdk/indexing/util/Uploader$UploaderHelper.class
+     sourceDir: indexing/src/main/java
+     sourceFile: com/google/enterprise/cloudsearch/sdk/indexing/util/Uploader.java
+   - dir: indexing/target/classes
+     file: com/google/enterprise/cloudsearch/sdk/indexing/util/Uploader$Visitor.class
+     sourceDir: indexing/src/main/java
+     sourceFile: com/google/enterprise/cloudsearch/sdk/indexing/util/Uploader.java
+   - dir: indexing/target/classes
+     file: com/google/enterprise/cloudsearch/sdk/indexing/ContentUploadServiceImpl.class
+     sourceDir: indexing/src/main/java
+     sourceFile: com/google/enterprise/cloudsearch/sdk/indexing/ContentUploadServiceImpl.java
+# Target TGF: 619.552083333
+#  >methods=13
+#  >complexity=264
+#  >construction=11.75
+#  >dependency=1.20833333333
+ - target:
+   - dir: it/target/classes
+     file: com/google/enterprise/cloudsearch/sdk/identity/CloudIdentityFacade.class
+     sourceDir: it/src/main/java
+     sourceFile: com/google/enterprise/cloudsearch/sdk/identity/CloudIdentityFacade.java
+   - dir: sdk/target/classes
+     file: com/google/enterprise/cloudsearch/sdk/RetryPolicy$Builder.class
+     sourceDir: sdk/src/main/java
+     sourceFile: com/google/enterprise/cloudsearch/sdk/RetryPolicy.java
+   - dir: sdk/target/classes
+     file: com/google/enterprise/cloudsearch/sdk/BaseApiService$RetryRequestInitializer.class
+     sourceDir: sdk/src/main/java
+     sourceFile: com/google/enterprise/cloudsearch/sdk/BaseApiService.java
+# Target TGF: 1233.0
+#  >methods=27
+#  >complexity=413
+#  >construction=56.8928571429
+#  >dependency=10.0
+ - target:
+   - dir: sdk/target/classes
+     file: com/google/enterprise/cloudsearch/sdk/config/Configuration.class
+     sourceDir: sdk/src/main/java
+     sourceFile: com/google/enterprise/cloudsearch/sdk/config/Configuration.java
+   - dir: sdk/target/classes
+     file: com/google/enterprise/cloudsearch/sdk/InvalidConfigurationException.class
+     sourceDir: sdk/src/main/java
+     sourceFile: com/google/enterprise/cloudsearch/sdk/InvalidConfigurationException.java
+   - dir: sdk/target/classes
+     file: com/google/enterprise/cloudsearch/sdk/config/Configuration$ListParser.class
+     sourceDir: sdk/src/main/java
+     sourceFile: com/google/enterprise/cloudsearch/sdk/config/Configuration.java
+   - dir: sdk/target/classes
+     file: com/google/enterprise/cloudsearch/sdk/config/SensitiveDataCodec.class
+     sourceDir: sdk/src/main/java
+     sourceFile: com/google/enterprise/cloudsearch/sdk/config/SensitiveDataCodec.java
+   - dir: sdk/target/classes
+     file: com/google/enterprise/cloudsearch/sdk/config/ConfigValue$Builder.class
+     sourceDir: sdk/src/main/java
+     sourceFile: com/google/enterprise/cloudsearch/sdk/config/ConfigValue.java
+   - dir: sdk/target/classes
+     file: com/google/enterprise/cloudsearch/sdk/config/ConfigValue.class
+     sourceDir: sdk/src/main/java
+     sourceFile: com/google/enterprise/cloudsearch/sdk/config/ConfigValue.java
+# Target TGF: 477.30952381
+#  >methods=7
+#  >complexity=221
+#  >construction=10.5357142857
+#  >dependency=0.833333333333
+ - target:
+   - dir: it/target/classes
+     file: com/google/enterprise/cloudsearch/sdk/serving/SearchHelper.class
+     sourceDir: it/src/main/java
+     sourceFile: com/google/enterprise/cloudsearch/sdk/serving/SearchHelper.java
+   - dir: it/target/classes
+     file: com/google/enterprise/cloudsearch/sdk/serving/SearchAuthInfo.class
+     sourceDir: it/src/main/java
+     sourceFile: com/google/enterprise/cloudsearch/sdk/serving/SearchAuthInfo.java
+# Target TGF: 503.904761905
+#  >methods=12
+#  >complexity=301
+#  >construction=12.75
+#  >dependency=1.81904761905
+ - target:
+   - dir: it/target/classes
+     file: com/google/enterprise/cloudsearch/sdk/indexing/CloudSearchService.class
+     sourceDir: it/src/main/java
+     sourceFile: com/google/enterprise/cloudsearch/sdk/indexing/CloudSearchService.java
+# Target TGF: 846.0
+#  >methods=5
+#  >complexity=94
+#  >construction=9.0
+#  >dependency=1.0
+ - target:
+   - dir: indexing/target/classes
+     file: com/google/enterprise/cloudsearch/sdk/indexing/samples/QuickstartApiConnector.class
+     sourceDir: indexing/src/main/java
+     sourceFile: com/google/enterprise/cloudsearch/sdk/indexing/samples/QuickstartApiConnector.java
